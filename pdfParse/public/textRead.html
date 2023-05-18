@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="container">
+        <input type="file" id="inpFile">
+        <center><button type="button" id="btnUpload">Upload</button></center>
+        <br><br>
+        Select Voice: <select id='voiceList'></select> <br><br>
+        <br>
+        <button id='btnSpeak'>Speak!</button>
+        <button id="pause">pause</button>
+        <button id="stop">stop</button>
+        <br><br>
+        <textarea style="width: 300px; height: 150px;" id="resultText"
+            placeholder="Your PDF text will appear here..."></textarea>
+    </div>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+
+        }
+
+        body {
+            background-color: rgb(61, 61, 61);
+        }
+
+        .container {
+            background-image: linear-gradient(to right, #29524A, #E9BCB7);
+            height: 440px;
+            width: 500px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+        }
+
+
+        input {
+            height: 30px;
+            width: 100%;
+            background-color: rgba(27, 27, 27, 0.3);
+            color: white;
+            overflow-wrap: break-word;
+            border: none;
+            margin-bottom: 5px;
+        }
+
+
+        select {
+            height: 40px;
+            width: 100%;
+            background-color: rgba(27, 27, 27, 0.3);
+            color: white;
+        }
+
+        </style>
+        
+        <script>const inpFile = document.getElementById("inpFile");
+            const btnUpload = document.getElementById("btnUpload");
+            const resultText = document.getElementById("resultText");
+
+            btnUpload.addEventListener("click", () => {
+                const formData = new FormData();
+                formData.append("pdfFile", inpFile.files[0]);
+
+                fetch("/extract-text", {
+                    method: "post",
+                    body: formData
+
+                }).then(response => {
+                    return response.text();
+
+                }).then(extractedText => {
+                    resultText.value = extractedText;
+                    tts(extractedText);
+                })
+            });
+
+            var voiceList = document.querySelector('#voiceList');
+            var btnSpeak = document.querySelector('#btnSpeak');
+            var btnPasue = document.querySelector("#pause");
+            var btnStop = document.querySelector("#stop");
+            var synth = window.speechSynthesis;
+            var voices = [];
+
+            if (speechSynthesis !== undefined) {
+                speechSynthesis.onvoiceschanged = PopulateVoices;
+            }
+
+            function PopulateVoices() {
+                voices = synth.getVoices();
+                var selectedIndex = voiceList.selectedIndex < 0 ? 0 : voiceList.selectedIndex;
+                voiceList.innerHTML = '';
+
+                voices.forEach((voice) => {
+                    var listItem = document.createElement('option');
+                    listItem.textContent = voice.name;
+                    listItem.setAttribute('data-lang', voice.lang);
+                    listItem.setAttribute('data-name', voice.name);
+                    voiceList.appendChild(listItem);
+                });
+
+                voiceList.selectedIndex = selectedIndex;
+            }
+
+            function tts(text) {
+                btnSpeak.addEventListener('click', () => {
+                    var toSpeak = new SpeechSynthesisUtterance(text);
+                    console.log(toSpeak);
+                    var selectedVoiceName = voiceList.selectedOptions[0].getAttribute('data-name');
+
+                    voices.forEach((voice) => {
+                        if (voice.name === selectedVoiceName) {
+                            toSpeak.voice = voice;
+                        }
+                    });
+                    synth.speak(toSpeak);
+                });
+            }
+
+            btnPasue.addEventListener('click', () => {
+                synth.pause();
+
+                if (!synth.pending) {
+                    btnSpeak.innerHTML = 'Speak!';
+                }
+
+                else {
+                    btnSpeak.innerHTML = 'resume';
+
+                    btnSpeak.addEventListener('click', () => {
+                        synth.resume();
+                    });
+                }
+
+            });
+
+            btnStop.addEventListener('click', () => {
+                synth.cancel();
+            }) </script></body></html>

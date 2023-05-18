@@ -1,0 +1,39 @@
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+
+}
+
+body{
+    background-color: rgb(61, 61, 61);
+}
+.container {
+    background-image: linear-gradient(to right, #29524A, #E9BCB7);
+    height: 440px;
+    width: 500px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
+}
+
+
+input{
+    height: 30px;
+    width: 100%;
+    background-color: rgba(27, 27, 27, 0.3);
+    color: white;
+    overflow-wrap: break-word;
+    border: none;
+    margin-bottom: 5px;
+}
+
+
+select{
+    height: 40px;
+    width: 100%;
+    background-color: rgba(27, 27, 27, 0.3);
+    color: white;
+}
